@@ -1,0 +1,10 @@
+service: freely-homework
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-southeast-2
+
+functions:
+  hello:
+    handler: handler.handler
