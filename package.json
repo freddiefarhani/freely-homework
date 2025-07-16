@@ -9,8 +9,25 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.846.0",
+     "@aws-sdk/client-dynamodb": "^3.846.0",
     "@aws-sdk/client-sns": "^3.846.0",
-    "@aws-sdk/lib-dynamodb": "^3.846.0"
+    "@aws-sdk/client-sqs": "^3.846.0",
+    "@aws-sdk/lib-dynamodb": "^3.846.0",
+    "@types/uuid": "^10.0.0",
+    "aws-lambda": "^1.0.7",
+    "uuid": "^11.1.0",
+    "zod": "^4.0.5"
+  },
+ "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/aws-lambda": "^8.10.150",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.8.3"
   }
 }

@@ -1,0 +1,19 @@
+// User service - Business logic for user operations
+import { RegistrationData, User } from '../types';
+import { UserModel } from '../database/models/user';
+
+export class UserService {
+  constructor(private userModel: UserModel) {}
+
+  async registerUser(registrationData: RegistrationData): Promise<User> {
+    return await this.userModel.createUser(registrationData);
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return await this.userModel.getUserByEmail(email);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    return await this.userModel.deleteUser(id);
+  }
+}
