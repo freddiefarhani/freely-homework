@@ -20,8 +20,11 @@ const PostMessageSchema = z.object({
 export const createMessage: APIGatewayProxyHandler = async event => {
   try {
     Logger.info(`Creating message: ${event}`);
-
-    const { content, authorId } = CreateMessageSchema.parse(event);
+    if (!event.body) {
+      throw new Error('Body is required');
+    }
+    const body = JSON.parse(event.body || '{}');
+    const { content, authorId } = CreateMessageSchema.parse(body);
 
     await queueService.sendCreateMessage({ content, authorId });
 
@@ -111,7 +114,8 @@ export const postMessage: APIGatewayProxyHandler = async event => {
   try {
     Logger.info(`Posting message: ${event}`);
 
-    const { content, authorId } = PostMessageSchema.parse(event);
+    const body = JSON.parse(event.body || '{}');
+    const { content, authorId } = PostMessageSchema.parse(body);
 
     /**
      * Same as register user we can publish SNS event

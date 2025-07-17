@@ -17,14 +17,12 @@ export const userRegister: APIGatewayProxyHandler = async event => {
   try {
     Logger.info('User Registration is called', event);
 
-    if (!event) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Invalid request!' }),
-      };
+    if (!event.body) {
+      throw new Error('Body is required');
     }
 
-    const validateData = EventSchema.parse(event);
+    const body = JSON.parse(event.body || '{}');
+    const validateData = EventSchema.parse(body);
 
     const userExists = await userService.getUserByEmail(validateData.email);
     if (userExists) {
