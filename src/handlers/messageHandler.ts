@@ -81,21 +81,21 @@ export const deleteMessage: APIGatewayProxyHandler = async event => {
   try {
     Logger.info(`Deleting message: ${event}`);
 
-    const { messageId } = event.pathParameters || {};
+    const { id } = event.pathParameters || {};
 
-    if (!messageId) {
-      throw new Error('MessageId is required');
+    if (!id) {
+      throw new Error('Message ID is required');
     }
 
-    const message = await messageService.getMessageById(messageId);
+    const message = await messageService.getMessageById(id);
     Logger.debug(`Message: ${message}`);
 
     if (!message) {
       throw new Error('Message not found');
     }
 
-    await messageService.deleteMessage(messageId);
-    Logger.info(`Message deleted: ${messageId}`);
+    await messageService.deleteMessage(id);
+    Logger.info(`Message deleted: ${id}`);
 
     return {
       statusCode: 200,
