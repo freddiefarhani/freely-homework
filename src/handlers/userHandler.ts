@@ -3,8 +3,10 @@ import z from 'zod';
 import { UserService } from '../services/userService';
 import { UserRepository } from '../database';
 import { Logger } from '../utils/logger';
+import { NotificationService } from '../services/notificationService';
 
 const userService = new UserService(new UserRepository());
+const notificationService = new NotificationService();
 
 const EventSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -31,12 +33,20 @@ export const userRegister: APIGatewayProxyHandler = async event => {
         body: JSON.stringify({ message: 'User already exists!' }),
       };
     }
-    userService.registerUser(validateData);
-    Logger.info('Operation Successful', validateData);
+
+    Logger.info(
+      'About to send notification for user registration',
+      validateData
+    );
+    await notificationService.sendUserRegistrationNotification(validateData);
+    Logger.info(
+      'Notification sent successfully, user registration is in progress...',
+      validateData
+    );
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'User registered successfully!' }),
+      body: JSON.stringify({ message: 'User registration is in progress!' }),
     };
   } catch (error) {
     Logger.error('Error during user registration', error);
@@ -45,7 +55,7 @@ export const userRegister: APIGatewayProxyHandler = async event => {
       return {
         statusCode: 400,
         body: JSON.stringify({
-          message: 'Validation error!',
+          message: 'Validation error, request format is incorrect!',
           errors: error.issues,
         }),
       };

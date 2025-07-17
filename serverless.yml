@@ -8,8 +8,9 @@ provider:
   runtime: nodejs18.x
   region: ap-southeast-2
   environment:
-    USER_TABLE_NAME: users
+    USERS_TABLE_NAME: users
     USER_TABLE_INDEX: email-index
+    SNS_TOPIC: !Ref UserRegistrationTopic
   iam:
     role:
       statements:
@@ -25,6 +26,20 @@ provider:
             - !GetAtt UsersTable.Arn
             - !Sub "${UsersTable.Arn}/index/*"
 
+        - Effect: Allow
+          Action:
+            - sns:Publish
+            - sns:Subscribe
+            - sns:Receive
+          Resource: !Ref UserRegistrationTopic
+
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+
 functions:
   userRegister:
     handler: src/handlers/userHandler.userRegister
@@ -35,13 +50,20 @@ functions:
           cors:
             origin: "*"
             methods: POST
+  
+  handleUserRegistration:
+    handler: src/handlers/userNotificationHandler.handleUserRegistration
+    events:
+      - sns:
+          arn: !Ref UserRegistrationTopic
+          topicName: user-registration-topic
 
 resources:
   Resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.USER_TABLE_NAME}
+        TableName: ${self:provider.environment.USERS_TABLE_NAME}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -58,3 +80,9 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
+    
+    UserRegistrationTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: user-registration-topic
+        DisplayName: User Registration Notifications
