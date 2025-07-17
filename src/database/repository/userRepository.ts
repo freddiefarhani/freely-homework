@@ -1,5 +1,10 @@
 // User repository - DynamoDB operations for user table
-import { PutCommand, QueryCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  PutCommand,
+  QueryCommand,
+  DeleteCommand,
+  GetCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { RegistrationData, User } from '../../types';
 import { UserModel } from '../models/user';
 import { BaseRepository } from './baseRepository';
@@ -52,5 +57,12 @@ export class UserRepository extends BaseRepository implements UserModel {
         Key: { id },
       })
     );
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    const result = await this.docClient.send(
+      new GetCommand({ TableName: this.tableName, Key: { id } })
+    );
+    return (result.Item as User) || null;
   }
 }

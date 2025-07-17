@@ -51,6 +51,26 @@ functions:
             origin: "*"
             methods: POST
   
+  getUserByEmail:
+    handler: src/handlers/userHandler.getUserByEmail
+    events:
+      - http:
+          path: user/email/{email}
+          method: get
+          cors:
+            origin: "*"
+            methods: GET
+
+  deleteUserById:
+    handler: src/handlers/userHandler.deleteUserById
+    events:
+      - http:
+          path: user/{id}
+          method: delete
+          cors:
+            origin: "*"
+            methods: DELETE
+
   handleUserRegistration:
     handler: src/handlers/userNotificationHandler.handleUserRegistration
     events:

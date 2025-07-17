@@ -69,3 +69,74 @@ export const userRegister: APIGatewayProxyHandler = async event => {
     };
   }
 };
+
+export const getUserByEmail: APIGatewayProxyHandler = async event => {
+  try {
+    Logger.info('Get user by email is called', event);
+
+    const { email } = event.pathParameters || {};
+
+    if (!email) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Email is required!' }),
+      };
+    }
+    const user = await userService.getUserByEmail(email);
+
+    return user
+      ? {
+          statusCode: 200,
+          body: JSON.stringify(user),
+        }
+      : {
+          statusCode: 404,
+          body: JSON.stringify({ message: 'User not found!' }),
+        };
+  } catch (error) {
+    Logger.error('Error during get user by email', error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: (error as Error).message || 'Internal server error',
+      }),
+    };
+  }
+};
+
+export const deleteUserById: APIGatewayProxyHandler = async event => {
+  try {
+    Logger.info('Delete user by id is called', event);
+    const { id } = event.pathParameters || {};
+    if (!id) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Id is required!' }),
+      };
+    }
+    const user = await userService.getUserById(id);
+    if (!user) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: 'User not found!' }),
+      };
+    }
+
+    await userService.deleteUser(id);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'User deleted successfully!' }),
+    };
+  } catch (error) {
+    Logger.error('Error during delete user by id', error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: (error as Error).message || 'Internal server error',
+      }),
+    };
+  }
+};

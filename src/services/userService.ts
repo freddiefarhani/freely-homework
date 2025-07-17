@@ -18,4 +18,8 @@ export class UserService {
   async deleteUser(id: string): Promise<void> {
     return await this.userModel.deleteUser(id);
   }
+
+  async getUserById(id: string): Promise<User | null> {
+    return await this.userModel.getUserById(id);
+  }
 }
