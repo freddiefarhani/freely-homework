@@ -10,7 +10,10 @@ provider:
   environment:
     USERS_TABLE_NAME: users
     USER_TABLE_INDEX: email-index
+    MESSAGES_TABLE_NAME: messages
     SNS_TOPIC: !Ref UserRegistrationTopic
+    CREATE_MESSAGE_QUEUE_URL: !Ref CreateMessageQueue
+
   iam:
     role:
       statements:
@@ -25,6 +28,7 @@ provider:
           Resource:
             - !GetAtt UsersTable.Arn
             - !Sub "${UsersTable.Arn}/index/*"
+            - !GetAtt MessagesTable.Arn
 
         - Effect: Allow
           Action:
@@ -32,6 +36,14 @@ provider:
             - sns:Subscribe
             - sns:Receive
           Resource: !Ref UserRegistrationTopic
+
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:SendMessageBatch
+            - sqs:ReceiveMessage
+            - sqs:GetQueueUrl
+          Resource: !GetAtt CreateMessageQueue.Arn
 
         - Effect: Allow
           Action:
@@ -78,6 +90,53 @@ functions:
           arn: !Ref UserRegistrationTopic
           topicName: user-registration-topic
 
+  handleCreateMessage:
+    handler: src/handlers/queueHandler.handleCreateMessage
+    events:
+      - sqs:
+          arn: !GetAtt CreateMessageQueue.Arn
+          batchSize: 3
+
+  createMessage:
+    handler: src/handlers/messageHandler.createMessage
+    events:
+      - http:
+          path: /message/create
+          method: post
+          cors:
+            origin: "*"
+            methods: POST
+
+  listMessages:
+    handler: src/handlers/messageHandler.listMessages
+    events:
+      - http:
+          path: /message/list
+          method: get
+          cors:
+            origin: "*"
+            methods: GET
+
+  deleteMessage:
+    handler: src/handlers/messageHandler.deleteMessage
+    events:
+      - http:
+          path: /message/delete/{id}
+          method: delete
+          cors:
+            origin: "*"
+            methods: DELETE
+
+  postMessage:
+    handler: src/handlers/messageHandler.postMessage
+    events:
+      - http:
+          path: /message/post
+          method: post
+          cors:
+            origin: "*"
+            methods: POST
+
 resources:
   Resources:
     UsersTable:
@@ -101,8 +160,25 @@ resources:
             Projection:
               ProjectionType: ALL
     
+    MessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.MESSAGES_TABLE_NAME}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+    
     UserRegistrationTopic:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: user-registration-topic
         DisplayName: User Registration Notifications
+
+    CreateMessageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: create-message-queue
