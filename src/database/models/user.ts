@@ -1,9 +1,7 @@
-import { User } from '../../types';
+import { RegistrationData, User } from '../../types';
 
 export interface UserModel {
-  createUser(
-    userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<User>;
+  createUser(userData: RegistrationData): Promise<User>;
   getUserByEmail(email: string): Promise<User | null>;
   deleteUser(id: string): Promise<void>;
 }

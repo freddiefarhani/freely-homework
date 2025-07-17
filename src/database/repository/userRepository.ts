@@ -1,6 +1,6 @@
 // User repository - DynamoDB operations for user table
 import { PutCommand, QueryCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
-import { User } from '../../types';
+import { RegistrationData, User } from '../../types';
 import { UserModel } from '../models/user';
 import { BaseRepository } from './baseRepository';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,9 +10,7 @@ export class UserRepository extends BaseRepository implements UserModel {
     super(process.env.USERS_TABLE_NAME || 'users');
   }
 
-  async createUser(
-    userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<User> {
+  async createUser(userData: RegistrationData): Promise<User> {
     const id = uuidv4();
     const now = new Date().toISOString();
     const user: User = {
